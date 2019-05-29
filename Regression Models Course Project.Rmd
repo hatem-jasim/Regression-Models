@@ -1,0 +1,80 @@
+---
+title: "Regression Models Course Project"
+author: "Hatem Jasim Hatem"
+date: "May 17, 2019"
+output: pdf_document
+---
+## Introduction   
+This work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+* Is an automatic or manual transmission better for MPG
+
+* Quantify the MPG difference between automatic and manual transmissions
+
+
+To answer above questions make exploratory analysis to determine relationship between MPG and Transmission type (Automatic, Manual).
+
+## Exploratory analysis
+
+```{r}
+summary(mtcars$mpg)
+aggregate(mpg~am, data=mtcars, summary)
+
+
+
+```
+The exploratory analysis show difference in **MPG** depend on gear transmission types as shown in figure in appendix. This difference is significant depend on T-test p-value as shown below.   
+
+```{r}
+
+t.test(mpg ~ am, data = mtcars)$p.value
+
+```
+
+To develop mathematical model between transition and **MPG** used linear regression.
+
+## Modeling 
+
+```{r}
+model_1<- lm(mpg~factor(am), data = mtcars)
+summary(model_1)
+```
+The manual transition care have 7.245 mpg than automatic car. But $R^2= 0.3598$ this mean only 0.3598% of mpg variance controlled by gear transmission types. Therefore need to add more variables related with ***MPG*** to increase predict confidence.  
+
+```{r}
+res <- cor(mtcars)
+round(res, 2)
+```
+The correlation table show there are many variables strongly related to **MPG**.
+
+Therefore must develop **MPG** mathematical model with many variables rather than one variable by using multiple linear regression. Because there are variable does not correlated with **MPG** therefore use **stepwise** function to determine best variable to develop **MPG** mathematical formula. 
+
+
+```{r}
+model_2<- step(lm(mpg ~ ., data = mtcars), trace=0)
+summary(model_2)
+
+```
+
+## Conclusion
+
+According to summary of multiple linear regression (with, qsec, am) beset variable to predict **MPG** with variance  0.8497 % based on p.value and $R^2$
+
+* Increase care wight decrease **MPG** by $-3.9165*wt$ with probability $1- 2x6.95e^6$
+* Increase care accerlation increase **MPG** by $1.2259*qsec$ with probability  $1-2x 0.000216$.
+* Transition mode increase **MPG** by 2.9358 if manual or not effect if  automatic with probablity $1-2x0.046716$.
+
+* the final formula is for **MPG**: $$mpg =9.6178 -3.9165wt + 1.2259qsec + 2.9358am + \epsilon$$
+
+## Appendix
+
+```{r}
+boxplot(mpg ~ factor(mtcars$am,labels=c('Automatic','Manual')), 
+        data=mtcars, 
+        xlab="Transmission", 
+        ylab="Miles per Gallon", 
+        main="MPG vs. Transmission")
+par(mfrow = c(2,2))
+plot(model_2)
+
+```
